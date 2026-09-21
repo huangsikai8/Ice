@@ -3,6 +3,56 @@
     <h1>Ice</h1>
 </div>
 
+> [!IMPORTANT]
+> **This is an unofficial fork of [jordanbaird/Ice](https://github.com/jordanbaird/Ice).** It is not affiliated with or endorsed by the Ice project. It adds one change, described below, to the `macos-26` branch (0.11.13-dev). Everything else is the original Ice, and all credit for it goes to Jordan Baird. The original README follows this section.
+
+## About this fork
+
+### Covered menu bar items appear in the Ice Bar
+
+On a MacBook with a notch, or whenever an app has a long menu, macOS runs out of room in the menu bar and quietly drops the leftmost status items. Items in Ice's **visible** section can disappear this way. Because they aren't in the hidden section either, they don't show up in the Ice Bar, which leaves no way to reach them.
+
+With this fork, clicking the Ice icon to open the Ice Bar shows your hidden items **followed by any visible items that macOS has pushed off the menu bar**, in their usual left-to-right order. Clicking one uses Ice's existing "temporarily show" behavior: the item moves into view, opens its menu, and returns to its place after the rehide interval.
+
+<img src="Resources/Fork/covered-items.png" width="510" alt="The Ice Bar showing hidden items followed by the covered Wi-Fi and other visible items">
+
+In the screenshot, the Wi-Fi item and the two items after it belong to the visible section but were pushed off the menu bar by the notch and the frontmost app's menus.
+
+An item counts as covered when the window server reports its window as off-screen, so the change handles the notch and long app menus the same way, with no geometry calculations. The change is confined to two files:
+
+- [`Ice/MenuBar/IceBar/IceBar.swift`](Ice/MenuBar/IceBar/IceBar.swift): the hidden-section Ice Bar appends covered visible items (never the Ice icon itself).
+- [`Ice/MenuBar/MenuBarItems/MenuBarItemImageCache.swift`](Ice/MenuBar/MenuBarItems/MenuBarItemImageCache.swift): images for the visible section are also captured while that Ice Bar is open.
+
+The Ice Bar must be enabled (**Settings → General → Use Ice Bar**).
+
+### Building
+
+This fork is distributed as source only; there are no prebuilt releases. Building requires Xcode 26. The change has been tested on macOS 26.
+
+The app must be signed by an Apple developer team. Ice's helper service only accepts connections from code signed by the same team, and the hardened runtime refuses to load the bundled Sparkle framework otherwise. A free Personal Team works: add your Apple ID in **Xcode → Settings → Accounts**, then build with your team ID:
+
+```sh
+xcodebuild -project Ice.xcodeproj -scheme Ice -configuration Release \
+  -derivedDataPath build -allowProvisioningUpdates \
+  DEVELOPMENT_TEAM=<your team ID> CODE_SIGN_STYLE=Automatic \
+  CODE_SIGN_IDENTITY="Apple Development" build
+```
+
+The app is written to `build/Build/Products/Release/Ice.app`.
+
+Before installing:
+
+- **Quit and remove any other copy of Ice.** Every copy shares the bundle identifier `com.jordanbaird.Ice`, and macOS may launch the wrong one or apply permissions to it.
+- **Grant permissions again.** A new signature invalidates earlier Accessibility and Screen Recording grants. Running `tccutil reset Accessibility com.jordanbaird.Ice` and `tccutil reset ScreenCapture com.jordanbaird.Ice` clears stale entries first. Your settings and layout are kept.
+- **Decline in-app updates.** Updating installs the official build, which removes this change.
+
+### License
+
+Like the original, this fork is licensed under the [GNU General Public License v3.0](LICENSE). Modified by Sikai Huang on 21 September 2026, as described above.
+
+---
+
+
 Ice is a powerful menu bar management tool. While its primary function is hiding and showing menu bar items, it aims to cover a wide variety of additional features to make it one of the most versatile menu bar tools available.
 
 ![Banner](https://github.com/user-attachments/assets/4423085c-4e4b-4f3d-ad0f-90a217c03470)

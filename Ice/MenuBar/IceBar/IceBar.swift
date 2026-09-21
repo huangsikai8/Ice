@@ -271,7 +271,17 @@ private struct IceBarContentView: View {
     let section: MenuBarSection.Name
 
     private var items: [MenuBarItem] {
-        itemManager.itemCache.managedItems(for: section)
+        let sectionItems = itemManager.itemCache.managedItems(for: section)
+        guard section == .hidden else {
+            return sectionItems
+        }
+        // Visible items that the system has pushed off the menu bar (for
+        // example, by a long application menu or the notch) can't be seen
+        // or clicked, so show them in the Ice Bar after the hidden items.
+        let coveredItems = itemManager.itemCache.managedItems(for: .visible).filter { item in
+            item.tag != .visibleControlItem && !Bridging.isWindowOnScreen(item.windowID)
+        }
+        return sectionItems + coveredItems
     }
 
     private var configuration: MenuBarAppearanceConfigurationV2 {

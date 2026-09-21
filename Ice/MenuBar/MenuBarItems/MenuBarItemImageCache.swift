@@ -315,6 +315,11 @@ final class MenuBarItemImageCache: ObservableObject {
             let section = await appState.menuBarManager.iceBarPanel.currentSection
         {
             sectionsNeedingDisplay.append(section)
+            // The Ice Bar also displays covered visible items alongside the
+            // hidden section.
+            if section == .hidden {
+                sectionsNeedingDisplay.append(.visible)
+            }
         }
 
         await updateCache(sections: sectionsNeedingDisplay)
