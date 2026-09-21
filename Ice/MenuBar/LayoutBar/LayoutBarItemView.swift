@@ -43,6 +43,12 @@ final class LayoutBarItemView: NSView {
         }
     }
 
+    /// The image to display, falling back to an image of the source application's
+    /// icon if capturing the item failed.
+    private var displayedImage: NSImage {
+        cachedImage?.nsImage ?? item.fallbackImage
+    }
+
     /// A Boolean value that indicates whether the item view is a dragging placeholder.
     ///
     /// If this value is `true`, the item view does not draw its image.
@@ -113,7 +119,7 @@ final class LayoutBarItemView: NSView {
 
     override func draw(_ dirtyRect: NSRect) {
         if !isDraggingPlaceholder {
-            cachedImage?.nsImage.draw(
+            displayedImage.draw(
                 in: bounds,
                 from: .zero,
                 operation: .sourceOver,
@@ -159,7 +165,7 @@ final class LayoutBarItemView: NSView {
         pasteboardItem.setData(Data(), forType: .layoutBarItem)
 
         let draggingItem = NSDraggingItem(pasteboardWriter: pasteboardItem)
-        draggingItem.setDraggingFrame(bounds, contents: cachedImage?.nsImage)
+        draggingItem.setDraggingFrame(bounds, contents: displayedImage)
 
         beginDraggingSession(with: [draggingItem], event: event, source: self)
     }

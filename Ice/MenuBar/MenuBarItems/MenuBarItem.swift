@@ -4,6 +4,7 @@
 //
 
 import Cocoa
+import UniformTypeIdentifiers
 
 /// A structural representation of a menu bar item.
 struct MenuBarItem: CustomStringConvertible {
@@ -75,6 +76,28 @@ struct MenuBarItem: CustomStringConvertible {
             return nil
         }
         return NSRunningApplication(processIdentifier: sourcePID)
+    }
+
+    /// An image to display in place of the item's captured image, for use
+    /// when capturing the item fails.
+    ///
+    /// The image has the same size as the item, with the icon of the source
+    /// application (or a generic application icon, if the source application
+    /// is unknown) drawn at its center.
+    var fallbackImage: NSImage {
+        let icon = sourceApplication?.icon ?? NSWorkspace.shared.icon(for: .applicationBundle)
+        let iconSide = min(16, bounds.height)
+        return NSImage(size: bounds.size, flipped: false) { rect in
+            icon.draw(
+                in: CGRect(
+                    x: rect.midX - iconSide / 2,
+                    y: rect.midY - iconSide / 2,
+                    width: iconSide,
+                    height: iconSide
+                )
+            )
+            return true
+        }
     }
 
     // TODO: Generate this once, during initialization.

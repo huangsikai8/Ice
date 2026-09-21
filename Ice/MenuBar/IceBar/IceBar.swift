@@ -449,28 +449,23 @@ private struct IceBarItemView: View {
         }
     }
 
-    private var image: NSImage? {
-        guard let cachedImage = imageCache.images[item.tag] else {
-            return nil
-        }
-        return cachedImage.nsImage
+    private var image: NSImage {
+        imageCache.images[item.tag]?.nsImage ?? item.fallbackImage
     }
 
     var body: some View {
-        if let image {
-            Image(nsImage: image)
-                .contentShape(Rectangle())
-                .overlay {
-                    IceBarItemClickView(
-                        item: item,
-                        leftClickAction: leftClickAction,
-                        rightClickAction: rightClickAction
-                    )
-                }
-                .accessibilityLabel(item.displayName)
-                .accessibilityAction(named: "left click", leftClickAction)
-                .accessibilityAction(named: "right click", rightClickAction)
-        }
+        Image(nsImage: image)
+            .contentShape(Rectangle())
+            .overlay {
+                IceBarItemClickView(
+                    item: item,
+                    leftClickAction: leftClickAction,
+                    rightClickAction: rightClickAction
+                )
+            }
+            .accessibilityLabel(item.displayName)
+            .accessibilityAction(named: "left click", leftClickAction)
+            .accessibilityAction(named: "right click", rightClickAction)
     }
 }
 
